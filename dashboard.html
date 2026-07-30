@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Admin Dashboard</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#111;
+color:white;
+}
+
+h1,h2{
+color:gold;
+}
+
+.box{
+background:#222;
+padding:20px;
+margin:20px auto;
+max-width:500px;
+border-radius:10px;
+}
+
+input{
+padding:10px;
+width:80%;
+margin:10px;
+}
+
+button{
+padding:10px 20px;
+background:gold;
+border:none;
+cursor:pointer;
+}
+
+.message{
+color:lightgreen;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>Admin Dashboard</h1>
+
+<button id="logout">Logout</button>
+
+
+
+<div class="box">
+
+<h2>Add YouTube Video</h2>
+
+<input id="title" placeholder="Video Title">
+
+<br>
+
+<input id="link" placeholder="YouTube Link">
+
+<br>
+
+<button id="addVideo">
+Add Video
+</button>
+
+<p id="videoMessage" class="message"></p>
+
+</div>
+
+
+
+<div class="box">
+
+<h2>Add Gallery Image</h2>
+
+<input id="imageTitle" placeholder="Image Title">
+
+<br>
+
+<input id="imageUrl" placeholder="Image URL">
+
+<br>
+
+<button id="addImage">
+Add Image
+</button>
+
+<p id="imageMessage" class="message"></p>
+<hr>
+
+<h2>All Videos</h2>
+
+<div id="videoList"></div>
+
+<hr>
+
+<h2>All Gallery Images</h2>
+
+<div id="galleryList"></div>
+</div>
+
+
+
+
+<script type="module">
+
+
+import {initializeApp}
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+import {
+
+getAuth,
+
+onAuthStateChanged,
+
+signOut
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+
+const firebaseConfig={
+
+apiKey:"AIzaSyA3cH-kQPFiUHro5ExuNkCl0RoHCikeWPU",
+
+authDomain:"aschalew-media.firebaseapp.com",
+
+projectId:"aschalew-media",
+
+storageBucket:"aschalew-media.firebasestorage.app",
+
+messagingSenderId:"742494243511",
+
+appId:"1:742494243511:web:d4261e5b1e38909f3edb32"
+
+};
+
+
+
+const app=initializeApp(firebaseConfig);
+
+const db=getFirestore(app);
+
+const auth=getAuth(app);
+
+
+
+// Check Admin
+
+onAuthStateChanged(auth,(user)=>{
+
+if(!user){
+
+window.location.href="admin.html";
+
+}
+
+});
+
+
+
+// Logout
+
+document.getElementById("logout").onclick=()=>{
+
+signOut(auth);
+
+window.location.href="admin.html";
+
+};
+
+
+
+// Add Video
+
+document.getElementById("addVideo").onclick=async()=>{
+
+
+let title=document.getElementById("title").value;
+
+let link=document.getElementById("link").value;
+
+
+if(title=="" || link==""){
+
+alert("Fill all fields");
+
+return;
+
+}
+
+
+
+await addDoc(collection(db,"videos"),{
+
+title:title,
+
+link:link,
+
+likes:0,
+
+date:new Date()
+
+});
+
+
+
+document.getElementById("videoMessage").innerHTML=
+"✅ Video Added";
+
+
+};
+
+
+
+
+// Add Image
+
+document.getElementById("addImage").onclick=async()=>{
+
+
+let title=document.getElementById("imageTitle").value;
+
+let url=document.getElementById("imageUrl").value;
+
+
+
+if(title=="" || url==""){
+
+alert("Fill all fields");
+
+return;
+
+}
+
+
+
+await addDoc(collection(db,"images"),{
+
+title:title,
+
+url:url,
+
+date:new Date()
+
+});
+
+
+
+document.getElementById("imageMessage").innerHTML=
+"✅ Image Added";
+
+
+};
+
+async function loadVideos() {
+  
+  let box = document.getElementById("videoList");
+  
+  box.innerHTML = "";
+  
+  let querySnapshot = await getDocs(collection(db, "videos"));
+  
+  querySnapshot.forEach((doc) => {
+    
+    let data = doc.data();
+    
+    box.innerHTML += `
+<p>🎬 ${data.title}</p>
+`;
+    
+  });
+  
+}
+
+loadVideos();
+
+</script>
+
+
+</body>
+
